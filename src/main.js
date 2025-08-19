@@ -1,17 +1,16 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
-
-// Importa CSS do Bootstrap
+import router from './router'
 import 'bootstrap/dist/css/bootstrap.min.css'
-
-// Importa JS do Bootstrap (depende do Popper já incluído no pacote)
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-
-// Importa seu CSS global (opcional)
-//import './assets/main.css'
+import 'bootstrap'
 const app = createApp(App)
 
-app.use(createPinia())
+// Cria instância do Pinia
+const pinia = createPinia()
+
+// Registra no app
+app.use(pinia)
+app.use(router)
 
 app.mount('#app')

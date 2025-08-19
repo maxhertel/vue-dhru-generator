@@ -12,7 +12,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { useTemplateStore } from "../store/templates";
+import { useTemplateStore } from "../stores/templates"
 
 const store = useTemplateStore();
 const title = ref("");

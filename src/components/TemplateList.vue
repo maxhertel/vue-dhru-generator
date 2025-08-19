@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { useTemplateStore } from "../store/templates";
+import { useTemplateStore } from "../stores/templates"
 
 const store = useTemplateStore();
 
