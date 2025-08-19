@@ -8,14 +8,19 @@
       <textarea v-model="section.text" placeholder="Texto" class="border p-1 mr-2"></textarea>
       <button @click="removeSection(idx)" class="text-red-500">Remover</button>
     </div>
+    <input v-model="templateTitle" placeholder="Nome do template" class="border p-1 mr-2" />
+    <button class="mb-4 px-4 py-2 bg-green-500 text-white rounded" @click="saveTemplate">Salvar Template</button>
     <div class="border p-4 bg-white rounded shadow" v-html="generateHtml()"></div>
     <ExportButton :html="generateHtml()" />
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import ExportButton from "./ExportButton.vue";
+import { useTemplateStore } from "../stores/templates";
+
+const store = useTemplateStore();
 
 const sections = ref([
   {
@@ -24,6 +29,25 @@ const sections = ref([
     text: "Texto da seção...",
   },
 ]);
+
+const templateTitle = ref("");
+const editingIndex = ref(null); // <-- Adicione isso
+
+// Ouve o evento de seleção de template
+function handleSelectTemplate(e) {
+  const tpl = e.detail;
+  templateTitle.value = tpl.title;
+  sections.value = JSON.parse(JSON.stringify(tpl.sections));
+  // Descubra o índice do template selecionado
+  editingIndex.value = store.templates.findIndex((t) => t.title === tpl.title);
+}
+
+onMounted(() => {
+  window.addEventListener("select-template", handleSelectTemplate);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("select-template", handleSelectTemplate);
+});
 
 function addSection() {
   sections.value.push({
@@ -35,6 +59,29 @@ function addSection() {
 
 function removeSection(idx) {
   sections.value.splice(idx, 1);
+}
+
+function saveTemplate() {
+  if (!templateTitle.value) {
+    alert("Dê um nome ao template!");
+    return;
+  }
+  const newTemplate = {
+    title: templateTitle.value,
+    sections: JSON.parse(JSON.stringify(sections.value)),
+  };
+  if (editingIndex.value !== null && editingIndex.value !== -1) {
+    // Atualiza o template existente
+    store.templates[editingIndex.value] = newTemplate;
+    store.save();
+    alert("Template atualizado!");
+  } else {
+    // Cria novo template
+    store.addTemplate(newTemplate);
+    alert("Template salvo!");
+  }
+  templateTitle.value = "";
+  editingIndex.value = null;
 }
 
 function generateHtml() {
